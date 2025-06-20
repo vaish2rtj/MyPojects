@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Sudoku Solver</title>
+  <style>
+    table {
+      border-collapse: collapse;
+      margin: 20px auto;
+    }
+    td {
+      border: 1px solid black;
+      width: 40px;
+      height: 40px;
+      padding: 0;
+    }
+    input {
+      width: 100%;
+      height: 100%;
+      font-size: 20px;
+      text-align: center;
+      border: none;
+      outline: none;
+      box-sizing: border-box;
+    }
+    button {
+      display: block;
+      margin: 20px auto;
+      padding: 10px 20px;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+  <h2 style="text-align: center;">Sudoku Solver</h2>
+  <form onsubmit="event.preventDefault(); solve();">
+    <table>
+      <tbody id="board"></tbody>
+    </table>
+    <button type="submit">Solve</button>
+  </form>
+
+  <script>
+    window.onload = function () {
+      const board = document.getElementById("board");
+      for (let i = 0; i < 9; i++) {
+        const row = document.createElement("tr");
+        for (let j = 0; j < 9; j++) {
+          const cell = document.createElement("td");
+          const input = document.createElement("input");
+          input.type = "text";
+          input.maxLength = 1;
+          input.id = `cell-${i}-${j}`;
+          cell.appendChild(input);
+          row.appendChild(cell);
+        }
+        board.appendChild(row);
+      }
+    };
+
+    async function solve() {
+      const values = [];
+      for (let i = 0; i < 9; i++) {
+        for (let j = 0; j < 9; j++) {
+          let val = document.getElementById(`cell-${i}-${j}`).value;
+          values.push(val === "" ? "0" : val);
+        }
+      }
+
+      const response = await fetch("/solve", {
+        method: "POST",
+        headers: { "Content-Type": "text/plain" },
+        body: values.join(",")
+      });
+
+      const text = await response.text();
+      const result = text.split(",");
+      let k = 0;
+      for (let i = 0; i < 9; i++) {
+        for (let j = 0; j < 9; j++) {
+          document.getElementById(`cell-${i}-${j}`).value = result[k++] || "";
+        }
+      }
+    }
+  </script>
+</body>
+</html>
